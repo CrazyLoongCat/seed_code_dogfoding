@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.annotation-canvas {
+  cursor: crosshair;
+}
+
+.drawing-mode {
+  cursor: crosshair;
+}
+
+.select-mode {
+  cursor: default;
+}
+
+.annotation-bbox {
+  fill: none;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.annotation-bbox.selected {
+  stroke-width: 3;
+}
+
+.annotation-point {
+  cursor: pointer;
+}
+
+.resize-handle {
+  fill: white;
+  stroke: #3b82f6;
+  stroke-width: 2;
+  cursor: nwse-resize;
+}
