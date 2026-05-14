@@ -1,15 +1,13 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import useAnnotationStore from '../store/annotationStore';
 
 export default function AnnotationCanvas({ 
   imageUrl, 
-  imageWidth, 
-  imageHeight,
   classes,
+  annotations: externalAnnotations,
+  tool = 'select',
+  selectedClassId = null,
   onAnnotationAdd,
-  onAnnotationUpdate,
-  onAnnotationDelete,
-  annotations: externalAnnotations
+  onAnnotationDelete
 }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -21,30 +19,14 @@ export default function AnnotationCanvas({
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [drawStart, setDrawStart] = useState(null);
   const [tempBbox, setTempBbox] = useState(null);
-
-  const {
-    tool,
-    selectedClassId,
-    annotations,
-    selectedAnnotationId,
-    isDrawing,
-    currentShape,
-    zoom,
-    setTool,
-    setSelectedClass,
-    setAnnotations,
-    addAnnotation,
-    updateAnnotation,
-    deleteAnnotation,
-    selectAnnotation,
-    setDrawingState,
-    setZoom,
-    setPan
-  } = useAnnotationStore();
+  const [localAnnotations, setLocalAnnotations] = useState([]);
+  const [selectedAnnotationId, setSelectedAnnotationId] = useState(null);
+  const [imgWidth, setImgWidth] = useState(800);
+  const [imgHeight, setImgHeight] = useState(600);
 
   useEffect(() => {
     if (externalAnnotations) {
-      setAnnotations(externalAnnotations);
+      setLocalAnnotations(externalAnnotations);
     }
   }, [externalAnnotations]);
 
@@ -53,26 +35,28 @@ export default function AnnotationCanvas({
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         setCanvasSize({ width: rect.width, height: rect.height });
+        updateScale();
       }
     };
 
     updateSize();
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
-  }, []);
+  }, [imgWidth, imgHeight]);
 
-  useEffect(() => {
-    if (imageLoaded && imageWidth && imageHeight && canvasSize.width && canvasSize.height) {
-      const scaleX = (canvasSize.width - 100) / imageWidth;
-      const scaleY = (canvasSize.height - 100) / imageHeight;
-      const newScale = Math.min(scaleX, scaleY, 1);
-      setScale(newScale);
-      setOffset({
-        x: (canvasSize.width - imageWidth * newScale) / 2,
-        y: (canvasSize.height - imageHeight * newScale) / 2
-      });
-    }
-  }, [imageLoaded, imageWidth, imageHeight, canvasSize]);
+  const updateScale = () => {
+    if (!canvasSize.width || !canvasSize.height || !imgWidth || !imgHeight) return;
+    
+    const scaleX = (canvasSize.width - 50) / imgWidth;
+    const scaleY = (canvasSize.height - 50) / imgHeight;
+    const newScale = Math.min(scaleX, scaleY, 1);
+    
+    setScale(newScale);
+    setOffset({
+      x: (canvasSize.width - imgWidth * newScale) / 2,
+      y: (canvasSize.height - imgHeight * newScale) / 2
+    });
+  };
 
   const screenToImage = useCallback((screenX, screenY) => {
     return {
@@ -81,16 +65,9 @@ export default function AnnotationCanvas({
     };
   }, [offset, scale]);
 
-  const imageToScreen = useCallback((imageX, imageY) => {
-    return {
-      x: imageX * scale + offset.x,
-      y: imageY * scale + offset.y
-    };
-  }, [offset, scale]);
-
   const getBboxAtPoint = useCallback((x, y) => {
-    for (let i = annotations.length - 1; i >= 0; i--) {
-      const ann = annotations[i];
+    for (let i = localAnnotations.length - 1; i >= 0; i--) {
+      const ann = localAnnotations[i];
       if (ann.annotation_type === 'bbox' && ann.data) {
         const { x1, y1, x2, y2 } = ann.data;
         const screenX1 = x1 * scale + offset.x;
@@ -107,7 +84,7 @@ export default function AnnotationCanvas({
       }
     }
     return null;
-  }, [annotations, scale, offset]);
+  }, [localAnnotations, scale, offset]);
 
   const handleMouseDown = (e) => {
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
@@ -124,14 +101,13 @@ export default function AnnotationCanvas({
     if (tool === 'select') {
       const bbox = getBboxAtPoint(x, y);
       if (bbox) {
-        selectAnnotation(bbox.id);
+        setSelectedAnnotationId(bbox.id);
       } else {
-        selectAnnotation(null);
+        setSelectedAnnotationId(null);
       }
     } else if (tool === 'bbox' && selectedClassId) {
       const imageCoords = screenToImage(x, y);
       setDrawStart(imageCoords);
-      setDrawingState(true, { x: imageCoords.x, y: imageCoords.y });
     }
   };
 
@@ -173,13 +149,12 @@ export default function AnnotationCanvas({
         data: tempBbox,
         isNew: true
       };
-      addAnnotation(newAnnotation);
+      setLocalAnnotations(prev => [...prev, newAnnotation]);
       if (onAnnotationAdd) onAnnotationAdd(newAnnotation);
     }
 
     setDrawStart(null);
     setTempBbox(null);
-    setDrawingState(false);
   };
 
   const handleWheel = (e) => {
@@ -192,20 +167,20 @@ export default function AnnotationCanvas({
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
       if (selectedAnnotationId) {
-        const ann = annotations.find(a => a.id === selectedAnnotationId);
+        const ann = localAnnotations.find(a => a.id === selectedAnnotationId);
         if (ann) {
-          deleteAnnotation(selectedAnnotationId);
+          setLocalAnnotations(prev => prev.filter(a => a.id !== selectedAnnotationId));
+          setSelectedAnnotationId(null);
           if (onAnnotationDelete) onAnnotationDelete(ann);
         }
       }
     }
     if (e.key === 'Escape') {
-      selectAnnotation(null);
-      setTool('select');
+      setSelectedAnnotationId(null);
       setDrawStart(null);
       setTempBbox(null);
     }
-  }, [selectedAnnotationId, annotations, deleteAnnotation, selectAnnotation, setTool, onAnnotationDelete]);
+  }, [selectedAnnotationId, localAnnotations, onAnnotationDelete]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -221,6 +196,20 @@ export default function AnnotationCanvas({
     const cls = classes?.find(c => c.id === classId);
     return cls?.name || 'Unknown';
   };
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setImgWidth(img.naturalWidth || 800);
+      setImgHeight(img.naturalHeight || 600);
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      console.error('Failed to load image');
+      setImageLoaded(true);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
 
   return (
     <div 
@@ -239,19 +228,18 @@ export default function AnnotationCanvas({
         onWheel={handleWheel}
         className="absolute inset-0"
       >
-        {imageUrl && (
+        {imageUrl && imageLoaded && (
           <image
             href={imageUrl}
             x={offset.x}
             y={offset.y}
-            width={imageWidth * scale}
-            height={imageHeight * scale}
-            onLoad={() => setImageLoaded(true)}
-            preserveAspectRatio="none"
+            width={imgWidth * scale}
+            height={imgHeight * scale}
+            preserveAspectRatio="xMidYMid meet"
           />
         )}
 
-        {annotations.map((ann) => {
+        {localAnnotations.map((ann) => {
           if (ann.annotation_type !== 'bbox' || !ann.data) return null;
           
           const { x1, y1, x2, y2 } = ann.data;
@@ -322,6 +310,15 @@ export default function AnnotationCanvas({
       <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded text-sm">
         缩放: {Math.round(scale * 100)}% | Alt+拖动平移 | 滚轮缩放 | Delete删除
       </div>
+
+      {!imageLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-white">加载图片中...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

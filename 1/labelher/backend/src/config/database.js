@@ -19,6 +19,13 @@ function saveDatabase(db) {
   fs.writeFileSync(dbPath, buffer);
 }
 
+function safeValue(value) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  return value;
+}
+
 async function getDatabase() {
   if (dbInstance) return dbInstance;
   
@@ -46,39 +53,45 @@ async function getDatabase() {
     return {
       run: function(...params) {
         try {
-          stmt.bind(params);
+          const safeParams = params.map(safeValue);
+          stmt.bind(safeParams);
           stmt.step();
-        } catch(e) {}
-        try {
           stmt.free();
-        } catch(e) {}
-        saveDatabase(db);
+          saveDatabase(db);
+        } catch(e) {
+          console.error('Database run error:', e);
+          try { stmt.free(); } catch(e) {}
+        }
         return this;
       },
       get: function(...params) {
         let result = undefined;
         try {
-          stmt.bind(params);
+          const safeParams = params.map(safeValue);
+          stmt.bind(safeParams);
           if (stmt.step()) {
             result = stmt.getAsObject();
           }
-        } catch(e) {}
-        try {
           stmt.free();
-        } catch(e) {}
+        } catch(e) {
+          console.error('Database get error:', e);
+          try { stmt.free(); } catch(e) {}
+        }
         return result;
       },
       all: function(...params) {
         const results = [];
         try {
-          stmt.bind(params);
+          const safeParams = params.map(safeValue);
+          stmt.bind(safeParams);
           while (stmt.step()) {
             results.push(stmt.getAsObject());
           }
-        } catch(e) {}
-        try {
           stmt.free();
-        } catch(e) {}
+        } catch(e) {
+          console.error('Database all error:', e);
+          try { stmt.free(); } catch(e) {}
+        }
         return results;
       }
     };
@@ -86,8 +99,12 @@ async function getDatabase() {
   
   const originalExec = db.exec.bind(db);
   db.exec = function(sql) {
-    originalExec(sql);
-    saveDatabase(db);
+    try {
+      originalExec(sql);
+      saveDatabase(db);
+    } catch(e) {
+      console.error('Database exec error:', e);
+    }
   };
   
   db.save = () => saveDatabase(db);

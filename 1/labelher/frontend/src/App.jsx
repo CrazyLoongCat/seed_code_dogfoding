@@ -1,35 +1,24 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import useAuthStore from './store/authStore';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
-import ProjectList from './pages/ProjectList';
-import ProjectDetail from './pages/ProjectDetail';
 import AnnotationPage from './pages/AnnotationPage';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
+import TestAuth from './pages/TestAuth';
+import TestFetch from './pages/TestFetch';
+import SimpleImageTest from './pages/SimpleImageTest';
 
 function App() {
-  const { isAuthenticated, token } = useAuthStore();
-
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
-        
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/projects" element={<ProjectList />} />
-            <Route path="/projects/:projectId" element={<ProjectDetail />} />
-            <Route path="/annotation/:imageId" element={<AnnotationPage />} />
-          </Route>
-        </Route>
-        
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/annotation/:imageId" element={<AnnotationPage />} />
+        <Route path="/test-auth" element={<TestAuth />} />
+        <Route path="/test-fetch/:imageId?" element={<TestFetch />} />
+        <Route path="/test-image" element={<SimpleImageTest />} />
       </Routes>
     </Router>
   );

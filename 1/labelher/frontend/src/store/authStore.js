@@ -1,73 +1,100 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { authAPI } from '../lib/api';
 
-const useAuthStore = create(
-  persist(
-    (set) => ({
+const STORAGE_KEY = 'labelher-auth';
+
+const loadFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Failed to load auth from storage:', e);
+  }
+  return { user: null, token: null, isAuthenticated: false };
+};
+
+const saveToStorage = (state) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      user: state.user,
+      token: state.token,
+      isAuthenticated: state.isAuthenticated
+    }));
+  } catch (e) {
+    console.error('Failed to save auth to storage:', e);
+  }
+};
+
+const initialState = loadFromStorage();
+
+const useAuthStore = create((set) => ({
+  user: initialState.user,
+  token: initialState.token,
+  isAuthenticated: initialState.isAuthenticated,
+  isLoading: false,
+  error: null,
+
+  login: async (credentials) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authAPI.login(credentials);
+      const { token, user } = response.data;
+      const newState = {
+        user,
+        token,
+        isAuthenticated: true,
+        isLoading: false
+      };
+      set(newState);
+      saveToStorage(newState);
+      return { success: true };
+    } catch (error) {
+      const newState = {
+        error: error.response?.data?.error || '登录失败',
+        isLoading: false
+      };
+      set(newState);
+      return { success: false, error: newState.error };
+    }
+  },
+
+  register: async (userData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authAPI.register(userData);
+      const { token, user } = response.data;
+      const newState = {
+        user,
+        token,
+        isAuthenticated: true,
+        isLoading: false
+      };
+      set(newState);
+      saveToStorage(newState);
+      return { success: true };
+    } catch (error) {
+      const newState = {
+        error: error.response?.data?.error || '注册失败',
+        isLoading: false
+      };
+      set(newState);
+      return { success: false, error: newState.error };
+    }
+  },
+
+  logout: () => {
+    const newState = {
       user: null,
       token: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
+      isAuthenticated: false
+    };
+    set(newState);
+    localStorage.removeItem(STORAGE_KEY);
+  },
 
-      login: async (credentials) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await authAPI.login(credentials);
-          const { token, user } = response.data;
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-            isLoading: false
-          });
-          return { success: true };
-        } catch (error) {
-          set({
-            error: error.response?.data?.error || '登录失败',
-            isLoading: false
-          });
-          return { success: false, error: error.response?.data?.error || '登录失败' };
-        }
-      },
-
-      register: async (userData) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await authAPI.register(userData);
-          const { token, user } = response.data;
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-            isLoading: false
-          });
-          return { success: true };
-        } catch (error) {
-          set({
-            error: error.response?.data?.error || '注册失败',
-            isLoading: false
-          });
-          return { success: false, error: error.response?.data?.error || '注册失败' };
-        }
-      },
-
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false
-        });
-      },
-
-      clearError: () => set({ error: null })
-    }),
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated })
-    }
-  )
-);
+  clearError: () => set({ error: null })
+}));
 
 export default useAuthStore;
