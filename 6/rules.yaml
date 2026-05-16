@@ -1,0 +1,40 @@
+columns:
+  id:
+    type: int
+    range:
+      min: 1
+  age:
+    type: int
+    range:
+      min: 18
+      max: 70
+  salary:
+    type: float
+    range:
+      min: 0
+      max: 100000
+  email:
+    type: str
+    format: email
+  join_date:
+    type: datetime
+  start_date:
+    type: datetime
+  end_date:
+    type: datetime
+  is_active:
+    type: bool
+  department:
+    type: str
+    allowed_values:
+      - 技术部
+      - 市场部
+      - 财务部
+      - 人力资源部
+      - 产品部
+
+cross_column_rules:
+  - expression: "`start_date` <= `end_date`"
+    description: "开始日期不能晚于结束日期"
+  - expression: "`salary` >= 0"
+    description: "薪资必须大于等于0"

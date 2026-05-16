@@ -1,0 +1,261 @@
+{
+  "input_file": "test.csv",
+  "output_file": ".\\test_fixed.csv",
+  "report_file": ".\\test_quality_report.json",
+  "timestamp": "2026-05-16T14:56:02.839717",
+  "summary": {
+    "total_rows": 992,
+    "total_columns": 14,
+    "column_types": {
+      "订单编号": "str",
+      "商品名称": "str",
+      "订单状态": "str",
+      "数量": "int",
+      "平台": "str",
+      "金额￥": "float",
+      "返利金额￥": "float",
+      "返利比例%": "float",
+      "返现给用户的金额": "float",
+      "返现给用户的比例": "float",
+      "下单时间": "datetime",
+      "订单状态.1": "str",
+      "完成时间": "datetime",
+      "用户id": "str"
+    },
+    "quality_score": 99.14,
+    "fixes_applied": true,
+    "rows_after_fix": 992
+  },
+  "detected_issues": {
+    "missing_values": {
+      "订单编号": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "商品名称": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "订单状态": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "数量": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "平台": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "金额￥": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "返利金额￥": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "返利比例%": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "返现给用户的金额": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "返现给用户的比例": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "下单时间": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "订单状态.1": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "完成时间": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "用户id": {
+        "count": 5,
+        "percentage": 0.5
+      }
+    },
+    "outliers": {
+      "数量": {
+        "iqr_lower_bound": -5.0,
+        "iqr_upper_bound": 11.0,
+        "iqr_outlier_count": 23,
+        "zscore_outlier_count": 14,
+        "outlier_indices": [
+          21,
+          355,
+          357,
+          360,
+          742,
+          744,
+          745,
+          805,
+          830,
+          831,
+          844,
+          845,
+          846,
+          847,
+          848,
+          890,
+          923,
+          924,
+          927,
+          928
+        ]
+      },
+      "金额￥": {
+        "iqr_lower_bound": -181.55000000000007,
+        "iqr_upper_bound": 1003.33,
+        "iqr_outlier_count": 194,
+        "zscore_outlier_count": 45,
+        "outlier_indices": [
+          21,
+          38,
+          161,
+          308,
+          317,
+          323,
+          324,
+          328,
+          334,
+          335,
+          338,
+          349,
+          350,
+          354,
+          355,
+          356,
+          357,
+          358,
+          359,
+          360
+        ]
+      },
+      "返利金额￥": {
+        "iqr_lower_bound": -4.94875,
+        "iqr_upper_bound": 14.541250000000002,
+        "iqr_outlier_count": 186,
+        "zscore_outlier_count": 43,
+        "outlier_indices": [
+          21,
+          38,
+          39,
+          308,
+          317,
+          320,
+          321,
+          322,
+          323,
+          324,
+          326,
+          328,
+          334,
+          335,
+          338,
+          344,
+          349,
+          350,
+          354,
+          355
+        ]
+      },
+      "返利比例%": {
+        "iqr_lower_bound": -0.45000000000000007,
+        "iqr_upper_bound": 3.1500000000000004,
+        "iqr_outlier_count": 0,
+        "zscore_outlier_count": 0,
+        "outlier_indices": []
+      },
+      "返现给用户的金额": {
+        "iqr_lower_bound": -2.6612499999999994,
+        "iqr_upper_bound": 7.8687499999999995,
+        "iqr_outlier_count": 189,
+        "zscore_outlier_count": 43,
+        "outlier_indices": [
+          21,
+          38,
+          39,
+          308,
+          317,
+          320,
+          321,
+          322,
+          323,
+          324,
+          326,
+          328,
+          334,
+          335,
+          338,
+          344,
+          349,
+          350,
+          354,
+          355
+        ]
+      },
+      "返现给用户的比例": {
+        "iqr_lower_bound": -0.25,
+        "iqr_upper_bound": 1.75,
+        "iqr_outlier_count": 0,
+        "zscore_outlier_count": 0,
+        "outlier_indices": []
+      }
+    },
+    "format_inconsistencies": {},
+    "duplicates": {
+      "count": 0,
+      "percentage": 0.0,
+      "duplicate_indices": []
+    },
+    "cross_column_violations": []
+  },
+  "repair_actions": [
+    {
+      "action": "fill_missing",
+      "column": "用户id",
+      "count": 5,
+      "method": "mode",
+      "fill_value": "omtXv5KlCiYn0LgLI4ZVVCCz1XNM"
+    },
+    {
+      "action": "cap_outliers",
+      "column": "数量",
+      "count": 23,
+      "lower_bound": -5.0,
+      "upper_bound": 11.0
+    },
+    {
+      "action": "cap_outliers",
+      "column": "金额￥",
+      "count": 194,
+      "lower_bound": -181.55000000000007,
+      "upper_bound": 1003.33
+    },
+    {
+      "action": "cap_outliers",
+      "column": "返利金额￥",
+      "count": 186,
+      "lower_bound": -4.94875,
+      "upper_bound": 14.541250000000002
+    },
+    {
+      "action": "cap_outliers",
+      "column": "返现给用户的金额",
+      "count": 189,
+      "lower_bound": -2.6612499999999994,
+      "upper_bound": 7.8687499999999995
+    }
+  ]
+}
