@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页可访问性与SEO健康度诊断仪 v2.0</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>网页可访问性与SEO健康度诊断仪 <span class="version-badge">v2.0</span></h1>
+            <p class="subtitle">多页面批量检测 · 趋势分析 · AI智能建议</p>
+        </header>
+
+        <main class="main-content">
+            <section class="mode-section">
+                <div class="mode-tabs">
+                    <button class="mode-tab active" data-mode="single">单页面检测</button>
+                    <button class="mode-tab" data-mode="batch">多页面对比</button>
+                    <button class="mode-tab" data-mode="trend">趋势分析</button>
+                </div>
+            </section>
+
+            <section class="url-input-section" id="singleMode">
+                <div class="input-group">
+                    <input type="url" id="urlInput" placeholder="请输入网页URL，例如：https://example.com" required>
+                    <button id="analyzeBtn" class="analyze-btn">开始诊断</button>
+                </div>
+                <p id="errorMessage" class="error-message"></p>
+            </section>
+
+            <section class="url-input-section hidden" id="batchMode">
+                <div class="batch-input-container">
+                    <div class="url-inputs-wrapper">
+                        <div class="url-input-row">
+                            <input type="url" class="batch-url-input" placeholder="URL 1" required>
+                            <button class="remove-url-btn" style="display:none;">×</button>
+                        </div>
+                    </div>
+                    <div class="batch-actions">
+                        <button id="addUrlBtn" class="secondary-btn">+ 添加URL</button>
+                        <label class="file-upload-btn secondary-btn">
+                            📁 上传URL文件
+                            <input type="file" id="fileInput" accept=".txt" style="display:none;">
+                        </label>
+                        <button id="batchAnalyzeBtn" class="analyze-btn">批量诊断</button>
+                    </div>
+                    <p class="hint-text">最多支持5个URL，可上传txt文件（每行一个URL）</p>
+                </div>
+                <p id="batchErrorMessage" class="error-message"></p>
+            </section>
+
+            <section class="url-input-section hidden" id="trendMode">
+                <div class="input-group">
+                    <input type="url" id="trendUrlInput" placeholder="输入要查看趋势的URL">
+                    <button id="trendBtn" class="analyze-btn">查看趋势</button>
+                </div>
+                <p id="trendErrorMessage" class="error-message"></p>
+            </section>
+
+            <section id="loadingSection" class="loading-section hidden">
+                <div class="spinner"></div>
+                <p id="loadingText">正在分析网页，请稍候...</p>
+            </section>
+
+            <section id="resultsSection" class="results-section hidden">
+                <div class="result-header">
+                    <h2 id="resultTitle">诊断结果</h2>
+                    <span id="cacheIndicator" class="cache-indicator hidden">（来自缓存）</span>
+                    <button id="exportBtn" class="secondary-btn small" style="margin-left:auto;">📥 导出报告</button>
+                </div>
+
+                <div id="singleResultContent">
+                    <div class="score-card">
+                        <div class="score-circle">
+                            <svg viewBox="0 0 120 120" class="score-svg">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="12" />
+                                <circle id="scoreCircle" cx="60" cy="60" r="54" fill="none" stroke="#4caf50" stroke-width="12" 
+                                        stroke-dasharray="339.292" stroke-dashoffset="339.292" 
+                                        transform="rotate(-90 60 60)" class="score-progress" />
+                            </svg>
+                            <div class="score-text">
+                                <span id="scoreValue">0</span>
+                                <span class="score-label">健康分</span>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <div id="scoreLevel" class="score-level">优秀</div>
+                            <p id="scoreDescription">您的网页在可访问性和SEO方面表现出色！</p>
+                        </div>
+                    </div>
+
+                    <div id="comparisonAlert" class="comparison-alert hidden"></div>
+
+                    <div class="rules-section">
+                        <h3>检测指标</h3>
+                        <div id="rulesContainer" class="rules-grid"></div>
+                    </div>
+
+                    <div class="suggestions-section">
+                        <h3>AI 优化建议</h3>
+                        <div id="suggestionsContainer" class="suggestions-list"></div>
+                    </div>
+                </div>
+
+                <div id="batchResultContent" class="hidden">
+                    <div id="commonIssuesSection" class="common-issues-section hidden">
+                        <h3>共性问题</h3>
+                        <div id="commonIssuesContainer" class="common-issues-list"></div>
+                        <div id="aggregateSuggestionsContainer" class="suggestions-list"></div>
+                    </div>
+
+                    <div class="comparison-section">
+                        <h3>对比表格</h3>
+                        <div class="table-wrapper">
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>URL</th>
+                                        <th>健康分</th>
+                                        <th>图片Alt</th>
+                                        <th>H1标签</th>
+                                        <th>链接文本</th>
+                                        <th>Lang属性</th>
+                                        <th>标题</th>
+                                        <th>Meta描述</th>
+                                        <th>视口</th>
+                                        <th>标题层级</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comparisonTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="batchDetailSection" class="hidden">
+                        <h3 id="batchDetailTitle">详情</h3>
+                        <div id="batchDetailContent"></div>
+                    </div>
+                </div>
+
+                <div id="trendResultContent" class="hidden">
+                    <div class="trend-section">
+                        <h3>健康分趋势</h3>
+                        <div class="trend-chart-container">
+                            <canvas id="trendChart" width="800" height="300"></canvas>
+                        </div>
+                        <div id="noTrendData" class="no-data hidden">
+                            <p>暂无历史数据，多次检测同一URL后将显示趋势图</p>
+                        </div>
+                    </div>
+
+                    <div id="trendComparisonSection" class="hidden">
+                        <h3>最近两次对比</h3>
+                        <div id="trendComparisonContainer" class="comparison-list"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>网页可访问性与SEO健康度诊断仪 v2.0 © 2026</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
