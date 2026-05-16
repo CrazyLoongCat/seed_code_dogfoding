@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能网页摘要与情感分析工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .input-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .url-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .analyze-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-header {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .result-title {
+            font-size: 1.4rem;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .summary-content {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #444;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .sentiment-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .sentiment-badge.positive {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .sentiment-badge.negative {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .sentiment-badge.neutral {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sentiment-score {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .score-fill.positive {
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+        }
+
+        .score-fill.negative {
+            background: linear-gradient(90deg, #eb3349, #f45c43);
+        }
+
+        .score-fill.neutral {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .error-card {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 12px;
+            padding: 20px;
+            color: #c53030;
+            margin-top: 20px;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        .error-card.show {
+            display: block;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .input-card, .result-card {
+                padding: 20px;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            .analyze-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 智能网页摘要与情感分析</h1>
+            <p>输入任意网页URL，AI将为您生成摘要并分析情感倾向</p>
+        </div>
+
+        <div class="input-card">
+            <div class="input-group">
+                <input 
+                    type="url" 
+                    id="urlInput" 
+                    class="url-input" 
+                    placeholder="请输入网页URL，例如：https://example.com"
+                    required
+                >
+                <button id="analyzeBtn" class="analyze-btn">
+                    <span id="btnText">开始分析</span>
+                </button>
+            </div>
+            <div style="font-size: 0.85rem; color: #888; line-height: 1.6;">
+                💡 支持新闻、博客、维基百科等各类静态网页<br>
+                ⚠️ 部分使用JavaScript动态加载的网站（如今日头条、抖音等）可能无法完整提取内容
+            </div>
+        </div>
+
+        <div id="errorCard" class="error-card"></div>
+
+        <div id="resultCard" class="result-card">
+            <div class="result-header">
+                <div class="section-label">网页标题</div>
+                <div id="resultTitle" class="result-title"></div>
+            </div>
+
+            <div class="result-section">
+                <div class="section-label">📝 内容摘要</div>
+                <div id="resultSummary" class="summary-content"></div>
+            </div>
+
+            <div class="result-section">
+                <div class="section-label">🎭 情感分析</div>
+                <div class="sentiment-wrapper">
+                    <span id="sentimentBadge" class="sentiment-badge"></span>
+                    <div class="score-bar">
+                        <div id="scoreFill" class="score-fill"></div>
+                    </div>
+                    <span id="sentimentScore" class="sentiment-score"></span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div id="contentLength" class="stat-value">0</div>
+                    <div class="stat-label">字符数</div>
+                </div>
+                <div class="stat-item">
+                    <div id="summaryLength" class="stat-value">0</div>
+                    <div class="stat-label">摘要字数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/analyze';
+
+        const urlInput = document.getElementById('urlInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const btnText = document.getElementById('btnText');
+        const resultCard = document.getElementById('resultCard');
+        const errorCard = document.getElementById('errorCard');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultSummary = document.getElementById('resultSummary');
+        const sentimentBadge = document.getElementById('sentimentBadge');
+        const scoreFill = document.getElementById('scoreFill');
+        const sentimentScore = document.getElementById('sentimentScore');
+        const contentLength = document.getElementById('contentLength');
+        const summaryLength = document.getElementById('summaryLength');
+
+        let isLoading = false;
+
+        function setLoading(loading) {
+            isLoading = loading;
+            analyzeBtn.disabled = loading;
+            if (loading) {
+                btnText.innerHTML = '<span class="loading"></span> 分析中...';
+            } else {
+                btnText.textContent = '开始分析';
+            }
+        }
+
+        function showError(message) {
+            errorCard.textContent = '❌ ' + message;
+            errorCard.classList.add('show');
+            resultCard.classList.remove('show');
+        }
+
+        function hideError() {
+            errorCard.classList.remove('show');
+        }
+
+        function getSentimentClass(sentiment) {
+            switch (sentiment) {
+                case '正面': return 'positive';
+                case '负面': return 'negative';
+                default: return 'neutral';
+            }
+        }
+
+        function getSentimentIcon(sentiment) {
+            switch (sentiment) {
+                case '正面': return '😊';
+                case '负面': return '😔';
+                default: return '😐';
+            }
+        }
+
+        function displayResult(data) {
+            resultTitle.textContent = data.title || '无标题';
+            resultSummary.textContent = data.summary;
+
+            const isDynamicWarning = data.summary && data.summary.includes('检测到动态加载内容的网站');
+            
+            if (isDynamicWarning) {
+                resultSummary.style.background = '#fff3cd';
+                resultSummary.style.borderLeftColor = '#ffc107';
+                resultSummary.style.color = '#856404';
+            } else {
+                resultSummary.style.background = '#f8f9fa';
+                resultSummary.style.borderLeftColor = '#667eea';
+                resultSummary.style.color = '#444';
+            }
+
+            const sentimentClass = getSentimentClass(data.sentiment);
+            const icon = getSentimentIcon(data.sentiment);
+            
+            sentimentBadge.className = `sentiment-badge ${sentimentClass}`;
+            sentimentBadge.innerHTML = `${icon} ${data.sentiment}`;
+
+            scoreFill.className = `score-fill ${sentimentClass}`;
+            scoreFill.style.width = `${data.sentiment_score * 100}%`;
+            
+            sentimentScore.textContent = `置信度 ${Math.round(data.sentiment_score * 100)}%`;
+
+            contentLength.textContent = data.content_length.toLocaleString();
+            summaryLength.textContent = data.summary.length;
+
+            hideError();
+            resultCard.classList.add('show');
+        }
+
+        async function analyzeUrl() {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('请输入有效的URL');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch (e) {
+                showError('请输入正确的URL格式');
+                return;
+            }
+
+            setLoading(true);
+            hideError();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '请求失败');
+                }
+
+                if (!data.success) {
+                    showError(data.message || '分析失败');
+                    return;
+                }
+
+                displayResult(data);
+
+            } catch (error) {
+                showError(error.message || '网络错误，请稍后重试');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        analyzeBtn.addEventListener('click', analyzeUrl);
+
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isLoading) {
+                analyzeUrl();
+            }
+        });
+
+        urlInput.addEventListener('input', () => {
+            hideError();
+        });
+    </script>
+</body>
+</html>
