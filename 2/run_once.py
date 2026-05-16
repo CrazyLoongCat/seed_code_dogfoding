@@ -1,12 +1,12 @@
 import asyncio
 import sys
-import io
 from datetime import datetime
 from config import Config
 from news_sources.factory import NewsSourceFactory
 from news_cleaner import NewsCleaner
 from ai_analyzer import AIAnalyzer
 from report_generator import ReportGenerator
+from notifier import Notifier
 
 async def fetch_all_news() -> list:
     all_news = []
@@ -39,8 +39,14 @@ def main():
     analyzer = AIAnalyzer()
     analysis_result = analyzer.analyze_news(cleaned_news)
     
+    analysis_result['date'] = datetime.now().strftime("%Y-%m-%d")
+    
     filepath = ReportGenerator.save_report(analysis_result)
     print(f"报告已生成: {filepath}")
+    
+    notifier = Notifier()
+    push_results = notifier.send_all(analysis_result, filepath)
+    print(f"推送结果: {push_results}")
     
     print("分析完成！")
 

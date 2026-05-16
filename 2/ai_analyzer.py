@@ -15,6 +15,9 @@ class AIAnalyzer:
         return news_text
     
     def analyze_with_openai(self, prompt: str) -> str:
+        if not self.openai_key:
+            raise ValueError("OpenAI API key is not set")
+        
         from openai import OpenAI
         client = OpenAI(api_key=self.openai_key)
         
@@ -31,6 +34,9 @@ class AIAnalyzer:
         return response.choices[0].message.content
     
     def analyze_with_anthropic(self, prompt: str) -> str:
+        if not self.anthropic_key:
+            raise ValueError("Anthropic API key is not set")
+        
         from anthropic import Anthropic
         client = Anthropic(api_key=self.anthropic_key)
         
@@ -46,6 +52,9 @@ class AIAnalyzer:
         return response.content[0].text
     
     def analyze_news(self, news_list: List[NewsItem]) -> Dict[str, Any]:
+        if not news_list:
+            return self._generate_sample_result([])
+        
         news_text = self.build_news_prompt(news_list)
         
         prompt = f"""
@@ -83,25 +92,47 @@ class AIAnalyzer:
         4. 所有输出使用中文
         """
         
-        if self.provider == "anthropic" and self.anthropic_key:
-            result = self.analyze_with_anthropic(prompt)
-        elif self.provider == "openai" and self.openai_key:
-            result = self.analyze_with_openai(prompt)
-        else:
-            result = self._generate_sample_result(news_list)
-        
         try:
+            if self.provider == "anthropic" and self.anthropic_key:
+                result = self.analyze_with_anthropic(prompt)
+            elif self.provider == "openai" and self.openai_key:
+                result = self.analyze_with_openai(prompt)
+            else:
+                print("API key 未配置，使用示例数据生成报告")
+                return self._generate_sample_result(news_list)
+            
             return json.loads(result)
-        except:
+        except Exception as e:
+            print(f"AI 分析失败: {e}，使用示例数据生成报告")
             return self._generate_sample_result(news_list)
     
     def _generate_sample_result(self, news_list: List[NewsItem]) -> Dict[str, Any]:
         sample_top_news = []
         for i, news in enumerate(news_list[:10]):
+            summary = news.summary[:50] + "..." if len(news.summary) > 50 else news.summary
+            if not summary:
+                summary = news.title[:50] + "..." if len(news.title) > 50 else news.title
+            
+            reasons = [
+                "重要财经事件，影响市场走势",
+                "政策面变化，值得重点关注",
+                "核心数据发布，反映经济趋势",
+                "行业重大新闻，影响相关板块",
+                "公司重要公告，影响股价表现"
+            ]
+            
             sample_top_news.append({
                 "title": news.title,
-                "summary": news.summary[:50] + "..." if len(news.summary) > 50 else news.summary,
-                "reason": "重要财经事件，影响市场走势"
+                "summary": summary,
+                "reason": reasons[i % len(reasons)]
+            })
+        
+        while len(sample_top_news) < 10:
+            idx = len(sample_top_news) + 1
+            sample_top_news.append({
+                "title": f"重要财经新闻 {idx}",
+                "summary": "今日重要财经事件摘要",
+                "reason": "影响市场的重要资讯"
             })
         
         return {

@@ -8,6 +8,7 @@ from news_sources.base import NewsItem
 from news_cleaner import NewsCleaner
 from ai_analyzer import AIAnalyzer
 from report_generator import ReportGenerator
+from notifier import Notifier
 
 async def fetch_all_news() -> list:
     all_news = []
@@ -33,11 +34,21 @@ def run_daily_analysis():
     cleaned_news = NewsCleaner.clean_and_preprocess(news_list, Config.TIMEZONE)
     print(f"清洗后剩余新闻: {len(cleaned_news)} 条")
     
+    if not cleaned_news:
+        cleaned_news = news_list[:20]
+        print("使用原始新闻数据进行分析")
+    
     analyzer = AIAnalyzer()
     analysis_result = analyzer.analyze_news(cleaned_news)
     
+    analysis_result['date'] = datetime.now().strftime("%Y-%m-%d")
+    
     filepath = ReportGenerator.save_report(analysis_result)
     print(f"报告已生成: {filepath}")
+    
+    notifier = Notifier()
+    push_results = notifier.send_all(analysis_result, filepath)
+    print(f"推送结果: {push_results}")
     
     print("每日财经新闻分析任务完成")
 
