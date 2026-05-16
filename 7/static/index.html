@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 财经新闻情报站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .sentiment-good { background-color: #dcfce7; color: #166534; }
+        .sentiment-bad { background-color: #fee2e2; color: #991b1b; }
+        .sentiment-neutral { background-color: #fef3c7; color: #92400e; }
+        .sentiment-pending { background-color: #f3f4f6; color: #374151; }
+        .log-INFO { color: #2563eb; }
+        .log-WARNING { color: #d97706; }
+        .log-ERROR { color: #dc2626; }
+        .log-DEBUG { color: #6b7280; }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .keyword-tag {
+            transition: all 0.2s;
+        }
+        .keyword-tag:hover {
+            transform: scale(1.05);
+        }
+        .provider-card {
+            transition: all 0.2s;
+        }
+        .provider-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">AI 财经新闻情报站</h1>
+                        <p class="text-sm text-gray-500">智能抓取 · 情感分析 · 脱水摘要</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="status-badge" class="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span>运行中</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm border">
+                <div class="text-sm text-gray-500 mb-1">新闻总数</div>
+                <div id="stat-total" class="text-2xl font-bold text-gray-800">0</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border">
+                <div class="text-sm text-gray-500 mb-1">待分析</div>
+                <div id="stat-pending" class="text-2xl font-bold text-yellow-600">0</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border">
+                <div class="text-sm text-gray-500 mb-1">AI 提供商</div>
+                <div id="stat-provider" class="text-2xl font-bold text-blue-600">-</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border">
+                <div class="text-sm text-gray-500 mb-1">抓取间隔</div>
+                <div id="stat-interval" class="text-2xl font-bold text-purple-600">-</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border mb-6">
+            <div class="flex border-b overflow-x-auto">
+                <button class="tab-btn tab-active px-6 py-3 font-medium whitespace-nowrap" data-tab="news">新闻列表</button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="sources">新闻源管理</button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="ai-config">AI 配置</button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="system">系统配置</button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="logs">运行日志</button>
+                <button class="tab-btn px-6 py-3 font-medium text-gray-500 hover:text-gray-700 whitespace-nowrap" data-tab="stats">统计分析</button>
+            </div>
+
+            <div id="tab-news" class="tab-content p-4">
+                <div class="flex flex-wrap gap-4 mb-4">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">情感筛选:</label>
+                        <select id="filter-sentiment" class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">全部</option>
+                            <option value="利好">利好</option>
+                            <option value="利空">利空</option>
+                            <option value="中性">中性</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">分析状态:</label>
+                        <select id="filter-analysis" class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">全部</option>
+                            <option value="true">已分析</option>
+                            <option value="false">未分析</option>
+                        </select>
+                    </div>
+                    <button onclick="loadNews()" class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition">
+                        刷新
+                    </button>
+                </div>
+
+                <div id="news-list" class="space-y-3">
+                    <div class="text-center py-8 text-gray-400">加载中...</div>
+                </div>
+
+                <div id="news-pagination" class="flex justify-center gap-2 mt-4">
+                </div>
+            </div>
+
+            <div id="tab-sources" class="tab-content p-4 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-medium text-gray-800">新闻源列表</h3>
+                    <button onclick="openSourceModal()" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        添加新闻源
+                    </button>
+                </div>
+                <div id="sources-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-center py-8 text-gray-400 col-span-full">加载中...</div>
+                </div>
+            </div>
+
+            <div id="tab-ai-config" class="tab-content p-4 hidden">
+                <div class="max-w-4xl mx-auto">
+                <h3 class="font-medium text-gray-800 mb-4">选择 AI 大模型配置</h3>
+                <div id="ai-providers" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="text-center py-8 text-gray-400 col-span-full">加载中...</div>
+                </div>
+
+                <div id="ai-config-form" class="border rounded-xl p-4">
+                    <h4 class="font-medium text-gray-700 mb-4">当前配置</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                            <input type="password" id="ai-api-key" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="输入 API Key">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">模型名称</label>
+                            <input type="text" id="ai-model" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="如: gpt-4o-mini">
+                        </div>
+                    </div>
+                    <button onclick="saveAIConfig()" class="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        保存配置
+                    </button>
+                </div>
+            </div>
+            </div>
+
+            <div id="tab-system" class="tab-content p-4 hidden">
+                <div class="max-w-3xl mx-auto">
+                    <form id="config-form" class="space-y-6">
+                        <div class="border rounded-xl p-4">
+                            <h3 class="font-medium text-gray-800 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                爬虫配置
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">抓取间隔 (分钟)</label>
+                                    <input type="number" name="FETCH_INTERVAL_MINUTES" min="1" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">每次最大抓取数</label>
+                                    <input type="number" name="MAX_NEWS_PER_RUN" min="1" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最小请求延迟 (秒)</label>
+                                    <input type="number" name="REQUEST_DELAY_MIN" min="1" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最大请求延迟 (秒)</label>
+                                    <input type="number" name="REQUEST_DELAY_MAX" min="1" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                            </div>
+                            </div>
+
+                        <div class="border rounded-xl p-4">
+                            <h3 class="font-medium text-gray-800 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                日志配置
+                            </h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">日志级别</label>
+                                <select name="LOG_LEVEL" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO">INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium">
+                                保存配置
+                            </button>
+                            <button type="button" onclick="loadSystemConfig()" class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition font-medium">
+                                重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="tab-logs" class="tab-content p-4 hidden">
+                <div class="flex gap-4 mb-4">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">日志级别:</label>
+                        <select id="log-level" class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">全部</option>
+                            <option value="INFO">INFO</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="DEBUG">DEBUG</option>
+                        </select>
+                    </div>
+                    <button onclick="loadLogs()" class="px-4 py-1.5 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition">
+                        刷新
+                    </button>
+                    <button onclick="autoRefreshLogs()" class="px-4 py-1.5 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition">
+                        自动刷新
+                    </button>
+                </div>
+                <div id="logs-container" class="bg-gray-900 rounded-xl p-4 font-mono text-sm overflow-auto max-h-[600px]">
+                    <div class="text-gray-400">加载中...</div>
+                </div>
+            </div>
+
+            <div id="tab-stats" class="tab-content p-4 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border rounded-xl p-4">
+                        <h3 class="font-medium text-gray-800 mb-4">情感分布</h3>
+                        <canvas id="sentiment-chart" height="250"></canvas>
+                    </div>
+                    <div class="border rounded-xl p-4">
+                        <h3 class="font-medium text-gray-800 mb-4">热门关键词</h3>
+                        <div id="keywords-cloud" class="flex flex-wrap gap-2">
+                            <div class="text-gray-400">加载中...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="news-modal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-start">
+                <h3 id="modal-title" class="text-lg font-bold text-gray-800 pr-4">新闻详情</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-content" class="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
+            </div>
+        </div>
+    </div>
+
+    <div id="source-modal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 id="source-modal-title" class="text-lg font-bold text-gray-800">添加新闻源</h3>
+                <button onclick="closeSourceModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="source-form" class="p-4 overflow-y-auto max-h-[calc(85vh-80px)]">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">名称 *</label>
+                            <input type="text" name="name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="如: 新浪财经">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                            <select name="category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="国内">国内</option>
+                                <option value="国际">国际</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">列表页 URL *</label>
+                        <input type="url" name="list_url" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://example.com/news">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">详情链接选择器</label>
+                        <input type="text" name="detail_url_selector" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder=".news-list li a">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">标题选择器</label>
+                            <input type="text" name="title_selector" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="h1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">时间选择器</label>
+                            <input type="text" name="time_selector" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder=".time">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">内容选择器</label>
+                            <input type="text" name="content_selector" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder=".article-content">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">robots.txt URL</label>
+                            <input type="url" name="robots_url" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://example.com/robots.txt">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                            <input type="number" name="priority" value="0" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="enabled" id="source-enabled" checked class="w-4 h-4 text-blue-600">
+                        <label for="source-enabled" class="text-sm text-gray-700">启用该新闻源</label>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium">
+                        保存
+                    </button>
+                    <button type="button" onclick="closeSourceModal()" class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition font-medium">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+        let autoRefreshInterval = null;
+        let editingSourceId = null;
+        let selectedAIProvider = 'openai';
+        let aiProviders = [];
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('tab-active', 'text-gray-800');
+                    b.classList.add('text-gray-500');
+                });
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                btn.classList.add('tab-active', 'text-gray-800');
+                btn.classList.remove('text-gray-500');
+                document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+                if (btn.dataset.tab === 'news') loadNews();
+                if (btn.dataset.tab === 'sources') loadSources();
+                if (btn.dataset.tab === 'ai-config') loadAIConfig();
+                if (btn.dataset.tab === 'system') loadSystemConfig();
+                if (btn.dataset.tab === 'logs') loadLogs();
+                if (btn.dataset.tab === 'stats') loadStats();
+            });
+        });
+
+        async function apiRequest(url, method = 'GET', body = null) {
+            const options = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) options.body = JSON.stringify(body);
+            const res = await fetch(url, options);
+            if (!res.ok) throw new Error('API Error');
+            return res.json();
+        }
+
+        async function loadStatus() {
+            try {
+                const data = await apiRequest('/api/status');
+                document.getElementById('stat-total').textContent = data.total_news;
+                document.getElementById('stat-pending').textContent = data.pending_analysis;
+                document.getElementById('stat-provider').textContent = data.ai_provider.toUpperCase();
+                document.getElementById('stat-interval').textContent = data.fetch_interval + ' 分钟';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadNews() {
+            const sentiment = document.getElementById('filter-sentiment').value;
+            const hasAnalysis = document.getElementById('filter-analysis').value;
+            let url = `/api/news?limit=${pageSize}&offset=${(currentPage - 1) * pageSize}`;
+            if (sentiment) url += `&sentiment=${sentiment}`;
+            if (hasAnalysis) url += `&has_analysis=${hasAnalysis}`;
+
+            try {
+                const data = await apiRequest(url);
+                const container = document.getElementById('news-list');
+                if (data.items.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-gray-400">暂无新闻数据</div>';
+                    return;
+                }
+
+                container.innerHTML = data.items.map(item => {
+                    const sentimentClass = item.sentiment === '利好' ? 'sentiment-good' :
+                                          item.sentiment === '利空' ? 'sentiment-bad' :
+                                          item.sentiment === '中性' ? 'sentiment-neutral' : 'sentiment-pending';
+                    const sentimentText = item.sentiment || '未分析';
+                    const keywordsHtml = item.keywords ? item.keywords.map(k =>
+                        `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${k}</span>`
+                    ).join('') : '';
+
+                    return `
+                        <div class="border rounded-lg p-4 hover:shadow-md transition cursor-pointer" onclick="showNewsDetail('${item.news_md5}')">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-800 mb-1">${item.title}</h4>
+                                    <p class="text-sm text-gray-500 mb-2 line-clamp-2">${item.ai_summary || item.raw_content}</p>
+                                    <div class="flex items-center gap-3 text-xs text-gray-400">
+                                        <span>${item.publish_time || item.created_at}</span>
+                                        <span class="px-2 py-0.5 rounded ${sentimentClass}">${sentimentText}</span>
+                                    </div>
+                                    ${keywordsHtml ? `<div class="flex flex-wrap gap-1 mt-2">${keywordsHtml}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const totalPages = Math.ceil(data.total / pageSize);
+                const pagination = document.getElementById('news-pagination');
+                if (totalPages > 1) {
+                    let html = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        html += `<button onclick="goToPage(${i})" class="px-3 py-1 rounded ${i === currentPage ? 'bg-blue-500 text-white' : 'border hover:bg-gray-50'}">${i}</button>`;
+                    }
+                    pagination.innerHTML = html;
+                } else {
+                    pagination.innerHTML = '';
+                }
+            } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            function goToPage(page) {
+                currentPage = page;
+                loadNews();
+            }
+
+            async function showNewsDetail(md5) {
+                try {
+                    const item = await apiRequest(`/api/news/${md5}`);
+                    const sentimentClass = item.sentiment === '利好' ? 'sentiment-good' :
+                                          item.sentiment === '利空' ? 'sentiment-bad' :
+                                          item.sentiment === '中性' ? 'sentiment-neutral' : 'sentiment-pending';
+                    const keywordsHtml = item.keywords ? item.keywords.map(k =>
+                        `<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">${k}</span>`
+                    ).join('') : '';
+
+                    document.getElementById('modal-title').textContent = item.title;
+                    document.getElementById('modal-content').innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 text-sm">
+                                <span class="text-gray-500">${item.publish_time || item.created_at}</span>
+                                <span class="px-2 py-0.5 rounded ${sentimentClass}">${item.sentiment || '未分析'}</span>
+                                <a href="${item.source_url}" target="_blank" class="text-blue-500 hover:underline">查看原文</a>
+                            </div>
+                            ${keywordsHtml ? `<div class="flex flex-wrap gap-1">${keywordsHtml}</div>` : ''}
+                            ${item.ai_summary ? `
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <h4 class="font-medium text-blue-800 mb-2">AI 脱水摘要</h4>
+                                <p class="text-blue-700">${item.ai_summary}</p>
+                            </div>
+                            ` : ''}
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-2">原始内容</h4>
+                                <p class="text-gray-600 whitespace-pre-wrap text-sm leading-relaxed">${item.raw_content}</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('news-modal').classList.remove('hidden');
+                    document.getElementById('news-modal').classList.add('flex');
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            function closeModal() {
+                document.getElementById('news-modal').classList.add('hidden');
+                document.getElementById('news-modal').classList.remove('flex');
+            }
+
+            document.getElementById('news-modal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeModal();
+            });
+
+            async function loadSources() {
+                try {
+                    const data = await apiRequest('/api/sources');
+                    const container = document.getElementById('sources-list');
+                    if (data.items.length === 0) {
+                        container.innerHTML = '<div class="text-center py-8 text-gray-400 col-span-full">暂无新闻源</div>';
+                        return;
+                    }
+
+                    container.innerHTML = data.items.map(source => `
+                        <div class="border rounded-xl p-4 ${source.enabled ? 'bg-white' : 'bg-gray-50'}">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">${source.name}</h4>
+                                    <span class="text-xs px-2 py-0.5 rounded ${source.category === '国内' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}">${source.category}</span>
+                                </div>
+                                <span class="text-xs px-2 py-0.5 rounded ${source.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}">${source.enabled ? '启用' : '禁用'}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3 truncate">${source.list_url}</p>
+                            <div class="flex gap-2 text-sm">
+                                <button onclick="editSource(${source.id})" class="text-blue-500 hover:text-blue-700">编辑</button>
+                                <button onclick="toggleSource(${source.id})" class="text-yellow-500 hover:text-yellow-700">${source.enabled ? '禁用' : '启用'}</button>
+                                <button onclick="deleteSource(${source.id})" class="text-red-500 hover:text-red-700">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            function openSourceModal(sourceId = null) {
+                editingSourceId = sourceId;
+                const form = document.getElementById('source-form');
+                form.reset();
+                document.getElementById('source-modal-title').textContent = sourceId ? '编辑新闻源' : '添加新闻源';
+
+                if (sourceId) {
+                    apiRequest(`/api/sources/${sourceId}`).then(source => {
+                        form.elements['name'].value = source.name;
+                        form.elements['category'].value = source.category;
+                        form.elements['list_url'].value = source.list_url;
+                        form.elements['detail_url_selector'].value = source.detail_url_selector || '';
+                        form.elements['title_selector'].value = source.title_selector || '';
+                        form.elements['time_selector'].value = source.time_selector || '';
+                        form.elements['content_selector'].value = source.content_selector || '';
+                        form.elements['robots_url'].value = source.robots_url || '';
+                        form.elements['priority'].value = source.priority || 0;
+                        form.elements['enabled'].checked = source.enabled;
+                    });
+                }
+
+                document.getElementById('source-modal').classList.remove('hidden');
+                document.getElementById('source-modal').classList.add('flex');
+            }
+
+            function closeSourceModal() {
+                document.getElementById('source-modal').classList.add('hidden');
+                document.getElementById('source-modal').classList.remove('flex');
+                editingSourceId = null;
+            }
+
+            document.getElementById('source-modal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeSourceModal();
+            });
+
+            document.getElementById('source-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = {
+                    name: formData.get('name'),
+                    category: formData.get('category'),
+                    list_url: formData.get('list_url'),
+                    detail_url_selector: formData.get('detail_url_selector') || null,
+                    title_selector: formData.get('title_selector') || null,
+                    time_selector: formData.get('time_selector') || null,
+                    content_selector: formData.get('content_selector') || null,
+                    robots_url: formData.get('robots_url') || null,
+                    priority: parseInt(formData.get('priority')) || 0,
+                    enabled: formData.get('enabled') ? 1 : 0,
+                };
+
+                try {
+                    if (editingSourceId) {
+                        await apiRequest(`/api/sources/${editingSourceId}`, 'PUT', data);
+                        alert('新闻源更新成功！');
+                    } else {
+                        await apiRequest('/api/sources', 'POST', data);
+                        alert('新闻源添加成功！');
+                    }
+                    closeSourceModal();
+                    loadSources();
+                } catch (e) {
+                    alert('保存失败，请检查输入');
+                }
+            });
+
+            async function editSource(id) {
+                openSourceModal(id);
+            }
+
+            async function toggleSource(id) {
+                try {
+                    await apiRequest(`/api/sources/${id}/toggle`, 'PATCH');
+                    loadSources();
+                } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+            async function deleteSource(id) {
+                    if (!confirm('确定要删除这个新闻源吗？')) return;
+                    try {
+                        await apiRequest(`/api/sources/${id}`, 'DELETE');
+                        loadSources();
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+            async function loadAIConfig() {
+                    try {
+                        const providers = await apiRequest('/ai/providers');
+                        aiProviders = providers.providers;
+                        const container = document.getElementById('ai-providers');
+
+                        container.innerHTML = aiProviders.map(p => `
+                            <div class="provider-card border-2 rounded-xl p-4 cursor-pointer hover:border-blue-300 transition" onclick="selectAIProvider('${p.id}')" data-provider="${p.id}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-gray-800">${p.name}</h4>
+                                    <span class="text-xs px-2 py-0.5 rounded ${p.type === '国产' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${p.type}</span>
+                                </div>
+                                <p class="text-xs text-gray-500">${p.base_url}</p>
+                            </div>
+                        `).join('');
+
+                        const config = await apiRequest('/api/config');
+                        selectedAIProvider = config.AI_PROVIDER || 'openai';
+                        selectAIProvider(selectedAIProvider);
+
+                        document.getElementById('ai-api-key').value = '';
+                        const modelKey = selectedAIProvider.toUpperCase() + '_MODEL';
+                        document.getElementById('ai-model').value = config[modelKey] || '';
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                function selectAIProvider(providerId) {
+                    selectedAIProvider = providerId;
+                    document.querySelectorAll('.provider-card').forEach(card => {
+                        if (card.dataset.provider === providerId) {
+                            card.classList.add('selected');
+                        } else {
+                            card.classList.remove('selected');
+                        }
+                    });
+                }
+
+                async function saveAIConfig() {
+                    const apiKey = document.getElementById('ai-api-key').value;
+                    const model = document.getElementById('ai-model').value;
+
+                    const updateData = { AI_PROVIDER: selectedAIProvider };
+                    const prefix = selectedAIProvider.toUpperCase();
+                    if (apiKey) updateData[prefix + '_API_KEY'] = apiKey;
+                    if (model) updateData[prefix + '_MODEL'] = model;
+
+                    try {
+                        await apiRequest('/api/config', 'PUT', updateData);
+                        alert('AI 配置已保存！部分配置需重启生效。');
+                        loadStatus();
+                    } catch (e) {
+                        alert('保存失败');
+                    }
+                }
+
+                async function loadSystemConfig() {
+                    try {
+                        const data = await apiRequest('/api/config');
+                        const form = document.getElementById('config-form');
+                        Object.keys(data).forEach(key => {
+                            const el = form.elements[key];
+                            if (el && !key.startsWith('HAS_')) {
+                                el.value = data[key] !== undefined && data[key] !== null ? data[key] : '';
+                            }
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                document.getElementById('config-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        if (value !== '' && value !== undefined && value !== null) {
+                            data[key] = value;
+                        }
+                    });
+                    try {
+                        await apiRequest('/api/config', 'PUT', data);
+                        alert('配置已保存！部分配置需重启程序生效。');
+                        loadStatus();
+                    } catch (e) {
+                        alert('保存失败，请检查日志');
+                    }
+                });
+
+                async function loadLogs() {
+                    const level = document.getElementById('log-level').value;
+                    let url = '/api/logs?limit=200';
+                    if (level) url += `&level=${level}`;
+                    try {
+                        const data = await apiRequest(url);
+                        const container = document.getElementById('logs-container');
+                        if (data.items.length === 0) {
+                            container.innerHTML = '<div class="text-gray-400">暂无日志</div>';
+                            return;
+                        }
+                        container.innerHTML = data.items.map(log =>
+                            `<div class="mb-1">
+                                <span class="text-gray-500">[${log.timestamp}]</span>
+                                <span class="log-${log.level}">[${log.level}]</span>
+                                <span class="text-gray-300">${log.message}</span>
+                            </div>`
+                        ).join('');
+                        container.scrollTop = 0;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                function autoRefreshLogs() {
+                    if (autoRefreshInterval) {
+                        clearInterval(autoRefreshInterval);
+                        autoRefreshInterval = null;
+                        alert('已停止自动刷新');
+                        return;
+                    }
+                    loadLogs();
+                    autoRefreshInterval = setInterval(loadLogs, 5000);
+                    alert('已开始自动刷新 (每5秒)');
+                }
+
+                let sentimentChart = null;
+
+                async function loadStats() {
+                    try {
+                        const [sentimentData, keywordsData] = await Promise.all([
+                            apiRequest('/api/stats/sentiment'),
+                            apiRequest('/api/stats/keywords')
+                        ]);
+
+                        const ctx = document.getElementById('sentiment-chart').getContext('2d');
+                        if (sentimentChart) sentimentChart.destroy();
+                        sentimentChart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['利好', '利空', '中性', '未分析'],
+                                datasets: [{
+                                    data: [sentimentData['利好'] || 0, sentimentData['利空'] || 0, sentimentData['中性'] || 0, sentimentData['未分析'] || 0],
+                                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b', '#9ca3af']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: { legend: { position: 'bottom' } }
+                            }
+                        });
+
+                        const cloud = document.getElementById('keywords-cloud');
+                        if (keywordsData.length === 0) {
+                            cloud.innerHTML = '<div class="text-gray-400">暂无关键词数据</div>';
+                        } else {
+                            const maxCount = Math.max(...keywordsData.map(k => k.count));
+                            cloud.innerHTML = keywordsData.map(kw => {
+                                const size = 0.75 + (kw.count / maxCount) * 0.75;
+                                return `<span class="keyword-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full" style="font-size: ${size}rem">${kw.keyword} (${kw.count})</span>`;
+                            }).join('');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                loadStatus();
+                loadNews();
+                setInterval(loadStatus, 30000);
+            </script>
+        </body>
+        </html>
