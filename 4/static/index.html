@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻热点趋势对比器</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📰 新闻热点趋势对比器</h1>
+            <p class="subtitle">实时对比两个新闻网站的热点话题，AI智能分析差异</p>
+        </header>
+
+        <div class="input-section">
+            <div class="source-inputs">
+                <div class="source-card">
+                    <div class="source-header source1">
+                        <span class="source-badge">来源1</span>
+                        <input type="text" id="source1Name" placeholder="来源名称" value="新浪微博">
+                    </div>
+                    <input type="text" id="url1" placeholder="输入URL或RSS链接" value="https://s.weibo.com/top/summary">
+                </div>
+
+                <div class="vs-divider">
+                    <span class="vs-text">VS</span>
+                </div>
+
+                <div class="source-card">
+                    <div class="source-header source2">
+                        <span class="source-badge">来源2</span>
+                        <input type="text" id="source2Name" placeholder="来源名称" value="百度热搜">
+                    </div>
+                    <input type="text" id="url2" placeholder="输入URL或RSS链接" value="https://top.baidu.com/board">
+                </div>
+            </div>
+
+            <div class="options-section">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="simulateAI" checked>
+                    <span>使用模拟AI（无需API密钥）</span>
+                </label>
+                <div class="api-key-section" id="apiKeySection" style="display: none;">
+                    <input type="password" id="apiKey" placeholder="OpenAI API Key">
+                </div>
+            </div>
+
+            <button class="compare-btn" id="compareBtn">
+                <span id="btnText">🔍 开始对比分析</span>
+                <div class="spinner" id="spinner" style="display: none;"></div>
+            </button>
+
+            <div class="quick-links">
+                <span>快捷选择:</span>
+                <button class="quick-btn" data-url1="https://s.weibo.com/top/summary" data-name1="新浪微博" data-url2="https://top.baidu.com/board" data-name2="百度热搜">微博 vs 百度</button>
+                <button class="quick-btn" data-url1="https://s.weibo.com/top/summary" data-name1="新浪微博" data-url2="https://www.zhihu.com/hot" data-name2="知乎热搜">微博 vs 知乎</button>
+                <button class="quick-btn" data-url1="https://top.baidu.com/board" data-name1="百度热搜" data-url2="https://www.zhihu.com/hot" data-name2="知乎热搜">百度 vs 知乎</button>
+            </div>
+        </div>
+
+        <div id="errorContainer" class="error-container" style="display: none;"></div>
+
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="loader"></div>
+                <p>正在抓取并分析热点数据...</p>
+            </div>
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div class="cache-badge" id="cacheBadge" style="display: none;">📦 来自缓存</div>
+            
+            <div class="stats-row">
+                <div class="stat-card source1-stat">
+                    <div class="stat-value" id="source1Count">0</div>
+                    <div class="stat-label" id="source1StatName">来源1</div>
+                </div>
+                <div class="stat-card merged-stat">
+                    <div class="stat-value" id="mergedCount">0</div>
+                    <div class="stat-label">合并后总数</div>
+                </div>
+                <div class="stat-card source2-stat">
+                    <div class="stat-value" id="source2Count">0</div>
+                    <div class="stat-label" id="source2StatName">来源2</div>
+                </div>
+            </div>
+
+            <div class="ai-analysis-card">
+                <div class="ai-header">
+                    <span class="ai-icon">🤖</span>
+                    <h2>AI智能分析</h2>
+                    <span class="analysis-mode" id="analysisMode">模拟模式</span>
+                </div>
+                <div class="comparison-text" id="comparisonText"></div>
+                <div class="themes-section">
+                    <div class="themes-column">
+                        <h4>共同主题</h4>
+                        <div class="themes-tags" id="commonThemes"></div>
+                    </div>
+                    <div class="themes-row">
+                        <div class="themes-column">
+                            <h4 id="source1TopicsTitle">来源1热门话题</h4>
+                            <div class="themes-tags" id="source1Topics"></div>
+                        </div>
+                        <div class="themes-column">
+                            <h4 id="source2TopicsTitle">来源2热门话题</h4>
+                            <div class="themes-tags" id="source2Topics"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-controls">
+                <h2>热点榜单</h2>
+                <div class="sort-controls">
+                    <label>排序:</label>
+                    <select id="sortSelect">
+                        <option value="hot_desc">热度从高到低</option>
+                        <option value="hot_asc">热度从低到高</option>
+                        <option value="title_asc">标题A-Z</option>
+                        <option value="title_desc">标题Z-A</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="news-table" id="newsTable">
+                    <thead>
+                        <tr>
+                            <th width="60">排名</th>
+                            <th>标题</th>
+                            <th width="120">热度</th>
+                            <th width="150">来源</th>
+                        </tr>
+                    </thead>
+                    <tbody id="newsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
