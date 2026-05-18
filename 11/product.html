@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summer Breeze 连衣裙 | 时尚精品店</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">LUXE</a>
+            <nav class="nav">
+                <a href="#">新品</a>
+                <a href="#">女装</a>
+                <a href="#">配饰</a>
+                <a href="#">特惠</a>
+            </nav>
+            <div class="header-actions">
+                <div class="currency-switcher">
+                    <select id="currencySelect">
+                        <option value="USD">USD $</option>
+                        <option value="EUR">EUR €</option>
+                        <option value="GBP">GBP £</option>
+                    </select>
+                </div>
+                <button class="cart-btn" id="cartBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="product-container">
+            <div class="product-gallery">
+                <div class="main-image-container">
+                    <img id="mainProductImage" src="" alt="" class="main-image">
+                    <div class="flying-image" id="flyingImage"></div>
+                </div>
+                <div class="thumbnail-gallery" id="thumbnailGallery">
+                </div>
+            </div>
+
+            <div class="product-info">
+                <div class="product-breadcrumb" id="productBreadcrumb"></div>
+                <h1 class="product-title" id="productTitle"></h1>
+                <div class="product-rating">
+                    <span class="stars">★★★★★</span>
+                    <span class="review-count" id="reviewCount"></span>
+                </div>
+                <div class="product-price">
+                    <span class="price-label">价格</span>
+                    <span class="price-value" id="priceValue"></span>
+                </div>
+
+                <p class="product-description" id="productDescription"></p>
+
+                <div class="product-options">
+                    <div class="option-group">
+                        <label class="option-label">尺码 <span class="size-guide">尺码指南</span></label>
+                        <div class="size-options" id="sizeOptions">
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">数量</label>
+                        <div class="quantity-selector">
+                            <button class="qty-btn" id="decreaseQty">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="10">
+                            <button class="qty-btn" id="increaseQty">+</button>
+                            <span class="stock-info" id="stockInfo"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-actions">
+                    <button class="add-to-cart-btn" id="addToCartBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        加入购物车
+                    </button>
+                    <button class="wishlist-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="product-features">
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 1v5h-5M21 1v5h-5M17 17h5v-5"></path>
+                            <path d="M21 15a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+                        </svg>
+                        <span>30天免费退换</span>
+                    </div>
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>全球配送</span>
+                    </div>
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <path d="M16 10h-6M16 14h-6"></path>
+                        </svg>
+                        <span>安全支付</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h2>我的购物车</h2>
+            <button class="close-btn" id="closeCart">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="cart-content" id="cartContent">
+            <div class="cart-empty" id="cartEmpty">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <p>购物车是空的</p>
+                <span>快去挑选心仪的商品吧</span>
+            </div>
+            <div class="cart-items" id="cartItems"></div>
+        </div>
+
+        <div class="cart-footer" id="cartFooter">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>商品小计</span>
+                    <span class="subtotal" id="subtotal">$0.00</span>
+                </div>
+
+                <div class="shipping-section">
+                    <div class="summary-row">
+                        <span>运费</span>
+                        <span class="shipping-cost" id="shippingCost">$0.00</span>
+                    </div>
+                    <div class="shipping-calculator">
+                        <label for="countrySelect">配送至:</label>
+                        <select id="countrySelect">
+                            <option value="US">美国</option>
+                            <option value="CA">加拿大</option>
+                            <option value="UK">英国</option>
+                            <option value="OTHER">其他国家</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="discount-section">
+                    <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                        <span>优惠折扣</span>
+                        <span class="discount-amount" id="discountAmount">-$0.00</span>
+                    </div>
+                    <div class="promo-code-section">
+                        <div class="promo-input-group">
+                            <input type="text" id="promoCodeInput" placeholder="输入优惠码">
+                            <button class="apply-promo-btn" id="applyPromoBtn">应用</button>
+                        </div>
+                        <div class="applied-promo" id="appliedPromo" style="display: none;">
+                            <span class="promo-tag" id="promoTag"></span>
+                            <button class="remove-promo-btn" id="removePromoBtn">移除</button>
+                        </div>
+                        <p class="promo-error" id="promoError"></p>
+                        <p class="promo-hint">可用优惠码: SAVE10 (减10%) / FREEship (免运费)</p>
+                    </div>
+                </div>
+
+                <div class="summary-row total-row">
+                    <span>总计</span>
+                    <span class="total" id="total">$0.00</span>
+                </div>
+            </div>
+
+            <div class="payment-options">
+                <p class="payment-label">支付方式</p>
+                <div class="payment-buttons">
+                    <button class="paypal-btn" id="paypalBtn">
+                        <svg width="80" height="24" viewBox="0 0 116 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24.361 5.531h-5.442l-1.484 9.23h3.908l.331-2.133h1.599c2.617 0 4.088-1.088 4.088-3.555 0-2.516-1.663-3.542-2.999-3.542zm-.758 4.922h-1.379l.483-3.17h1.269c.924 0 1.732.352 1.732 1.585 0 1.021-.561 1.585-2.105 1.585z" fill="#003087"/>
+                            <path d="M38.642 14.761c.959-.557 1.501-1.393 1.501-2.629 0-1.754-1.184-2.977-3.326-2.977h-4.372l-1.484 9.23h3.248l.331-2.133h1.445c2.197 0 3.448-1.037 4.131-2.182l.526-3.037h-2.025l-.232 1.382h-3.394l.774-4.837h2.894c1.163 0 1.821.364 1.821 1.372 0 .716-.221 1.164-.793 1.524l-.058.038c.631.25 1.032.806 1.032 1.71 0 1.099-.642 1.74-1.707 1.997l.001.002z" fill="#003087"/>
+                            <path d="M50.293 5.531h-3.687l-2.794 9.23h2.418l.521-1.82h3.127l.521 1.82h2.418l-2.794-9.23zm-1.764 5.062l1.021-3.572 1.021 3.572h-2.042z" fill="#003087"/>
+                            <path d="M56.65 5.531h2.874l-1.437 9.23h-2.874l1.437-9.23z" fill="#003087"/>
+                            <path d="M67.963 10.514c0-3.15-2.155-4.983-5.478-4.983h-4.915l-1.484 9.23h4.625l.165-1.072h.118c.591.932 1.708 1.663 3.427 1.663 3.371 0 5.659-2.08 5.659-4.84l-.002-.002zm-4.774 3.659h-2.307l.568-3.708h2.307c.939 0 1.521.376 1.521 1.265 0 .674-.323 1.14-1.174 1.636l.085.007c1.026.247 1.632.864 1.632 1.947 0 1.325-.953 2.14-2.586 2.14-1.272 0-2.087-.504-2.511-1.087l-.001.001z" fill="#003087"/>
+                            <path d="M79.366 5.531h-3.687l-2.794 9.23h2.418l.521-1.82h3.127l.521 1.82h2.418l-2.794-9.23zm-1.764 5.062l1.021-3.572 1.021 3.572h-2.042z" fill="#003087"/>
+                            <path d="M85.889 5.531h2.874l-1.437 9.23h-2.874l1.437-9.23z" fill="#003087"/>
+                            <path d="M100.18 5.531h-5.442l-1.484 9.23h3.908l.331-2.133h1.599c2.617 0 4.088-1.088 4.088-3.555 0-2.516-1.663-3.542-2.999-3.542zm-.758 4.922h-1.379l.483-3.17h1.269c.924 0 1.732.352 1.732 1.585 0 1.021-.561 1.585-2.105 1.585z" fill="#003087"/>
+                            <path d="M108.329 5.531h-2.863l-2.546 9.23h2.406l.492-1.82h2.919l.492 1.82h2.614l-1.52-4.811 1.811-4.419h-2.815l-.995 2.947-.585-2.947h.002z" fill="#003087"/>
+                        </svg>
+                    </button>
+                </div>
+                <button class="checkout-btn" id="checkoutBtn">继续结算</button>
+        </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
