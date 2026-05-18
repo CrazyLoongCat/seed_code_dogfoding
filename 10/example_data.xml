@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<items burpVersion="2024.1" exportTime="2024-01-15T10:30:00">
+  <item>
+    <time>Mon Jan 15 10:00:00 GMT 2024</time>
+    <url>https://api.example.com/api/v1/users/login</url>
+    <host>api.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>POST</method>
+    <path>/api/v1/users/login</path>
+    <extension/>
+    <status>200</status>
+    <responselength>1024</responselength>
+    <mimetype>JSON</mimetype>
+    <comment/>
+    <request base64="true">UE9TVCAvYXBpL3YxL3VzZXJzL2xvZ2luIEhUVFAvMS4xDQpIb3N0OiBhcGkuZXhhbXBsZS5jb20NClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjAuMC4wLjAgU2FmYXJpLzUzNy4zNg0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uDQpDb29raWU6IHNlc3Npb249YWJjMTIzZGVmNDU2DQoNCnsidXNlcm5hbWUiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicGFzc3dvcmQiOiJzZWNyZXRQYXNzMTIzIn0=</request>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDE1IEphbiAyMDI0IDEwOjAwOjAwIEdNVA0KU2VydmVyOiBBcGFjaGUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KQ29udGVudC1MZW5ndGg6IDI1MA0KDQp7InN1Y2Nlc3MiOnRydWUsImRhdGEiOnsidG9rZW4iOiJleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKcFpDSTZJbWgwYld3dFpXNTBMMlJsWm5RdFlXNWphRzl5TFdGdGFXNTBaWElpTENKMGVYQmxJam9pVTJ4NllXUnRhVzRpTENKMWMyVnlJam9pWkdWMFpXUWlMQ0pwYzNNaU9pSm9kSFJ3Y3pvdkwzZDNkeTk1Wm14dmJtVnlMbU52YlNJc0luVnpaWElpT2pFc0ltVnVhQ0k2SWpJc0ltRnBiQ0k2SWpFc0luZHpJaU9pSXhJbjB9LCJtZXNzYWdlIjoiTG9naW4gc3VjY2Vzc2Z1bCJ9</response>
+  </item>
+  <item>
+    <time>Mon Jan 15 10:00:05 GMT 2024</time>
+    <url>https://api.example.com/api/v1/users/profile</url>
+    <host>api.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/api/v1/users/profile</path>
+    <extension/>
+    <status>200</status>
+    <responselength>512</responselength>
+    <mimetype>JSON</mimetype>
+    <comment/>
+    <request base64="true">R0VUIC9hcGkvdjEvdXNlcnMvcHJvZmlsZSBIVFRQLzEuMQ0KSG9zdDogYXBpLmV4YW1wbGUuY29tDQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvMTIwLjAuMC4wIFNhZmFyaS81MzcuMzYNCkF1dGhvcml6YXRpb246IEJlYXJlciBleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKcFpDSTZJbWgwYld3dFpXNTBMMlJsWm5RdFlXNWphRzl5TFdGdGFXNTBaWElpTENKMGVYQmxJam9pVTJ4NllXUnRhVzRpTENKMWMyVnlJam9pWkdWMFpXUWlMQ0pwYzNNaU9pSm9kSFJ3Y3pvdkwzZDNkeTk1Wm14dmJtVnlMbU52YlNJc0luVnpaWElpT2pFc0ltVnVhQ0k2SWpJc0ltRnBiQ0k2SWpFc0luZHpJaU9pSXhJbjANCg0K</request>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDE1IEphbiAyMDI0IDEwOjAwOjA1IEdNVA0KU2VydmVyOiBBcGFjaGUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KQ29udGVudC1MZW5ndGg6IDM4MA0KDQp7InN1Y2Nlc3MiOnRydWUsImRhdGEiOnsiaWQiOjEsInVzZXJuYW1lIjoidGVzdEBleGFtcGxlLmNvbSIsIm5hbWUiOiJUZXN0IFVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImNyZWF0ZWRfYXQiOiIyMDIzLTEyLTAxVDAwOjAwOjAwWiJ9fQ==</response>
+  </item>
+  <item>
+    <time>Mon Jan 15 10:00:10 GMT 2024</time>
+    <url>https://api.example.com/api/v1/products</url>
+    <host>api.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/api/v1/products</path>
+    <extension/>
+    <status>200</status>
+    <responselength>2048</responselength>
+    <mimetype>JSON</mimetype>
+    <comment/>
+    <request base64="true">R0VUIC9hcGkvdjEvcHJvZHVjdHM/cGFnZT0xJmxpbWl0PTEwIEhUVFAvMS4xDQpIb3N0OiBhcGkuZXhhbXBsZS5jb20NClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjAuMC4wLjAgU2FmYXJpLzUzNy4zNg0KQWNjZXB0OiBhcHBsaWNhdGlvbi9qc29uDQoNCg==</request>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDE1IEphbiAyMDI0IDEwOjAwOjEwIEdNVA0KU2VydmVyOiBBcGFjaGUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KQ29udGVudC1MZW5ndGg6IDEwMjQNCg0KeyJzdWNjZXNzIjp0cnVlLCJkYXRhIjp7InRvdGFsIjo1MCwicGFnZSI6MSwibGltaXQiOjEwLCJpdGVtcyI6W3siaWQiOjEsIm5hbWUiOiJQcm9kdWN0IDEiLCJwcmljZSI6OTkuOTksInN0b2NrIjoxMDB9LHsiaWQiOjIsIm5hbWUiOiJQcm9kdWN0IDIiLCJwcmljZSI6MTQ5Ljk5LCJzdG9jayI6NTB9LHsiaWQiOjMsIm5hbWUiOiJQcm9kdWN0IDMiLCJwcmljZSI6MTk5Ljk5LCJzdG9jayI6MjV9XX19</response>
+  </item>
+  <item>
+    <time>Mon Jan 15 10:00:15 GMT 2024</time>
+    <url>https://api.example.com/api/v1/admin/users</url>
+    <host>api.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/api/v1/admin/users</path>
+    <extension/>
+    <status>403</status>
+    <responselength>128</responselength>
+    <mimetype>JSON</mimetype>
+    <comment/>
+    <request base64="true">R0VUIC9hcGkvdjEvYWRtaW4vdXNlcnMgSFRUUC8xLjENCkhvc3Q6IGFwaS5leGFtcGxlLmNvbQ0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMC4wLjAuMCBTYWZhcmkvNTM3LjM2DQoNCg==</request>
+    <response base64="true">SFRUUC8xLjEgNDAzIEZvcmJpZGRlbg0KRGF0ZTogTW9uLCAxNSBKYW4gMjAyNCAxMDowMDoxNSBHTVQNClNlcnZlcjogQXBhY2hlDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCkNvbnRlbnQtTGVuZ3RoOiA3NQ0KDQp7InN1Y2Nlc3MiOmZhbHNlLCJlcnJvciI6IkZvcmJpZGRlbiIsIm1lc3NhZ2UiOiJJbnN1ZmZpY2lldCBwZXJtaXNzaW9ucyJ9</response>
+  </item>
+  <item>
+    <time>Mon Jan 15 10:00:20 GMT 2024</time>
+    <url>https://www.example.com/not-found</url>
+    <host>www.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/not-found</path>
+    <extension/>
+    <status>404</status>
+    <responselength>256</responselength>
+    <mimetype>HTML</mimetype>
+    <comment/>
+    <request base64="true">R0VUIC9ub3QtZm91bmQgSFRUUC8xLjENCkhvc3Q6IHd3dy5leGFtcGxlLmNvbQ0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMC4wLjAuMCBTYWZhcmkvNTM3LjM2DQoNCg==</request>
+    <response base64="true">SFRUUC8xLjEgNDA0IE5vdCBGb3VuZA0KRGF0ZTogTW9uLCAxNSBKYW4gMjAyNCAxMDowMDoyMCBHTVQNClNlcnZlcjogQXBhY2hlDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD1VVEYtOA0KQ29udGVudC1MZW5ndGg6IDEyMA0KDQo8IURPQ1RZUEUgaHRtbD48aHRtbD48aGVhZD48dGl0bGU+NDA0IE5vdCBGb3VuZDwvdGl0bGU+PC9oZWFkPjxib2R5PjxoMT5Ob3QgRm91bmQ8L2gxPjxwPlRoZSByZXF1ZXN0ZWQgVVJMIHdhcyBub3QgZm91bmQgb24gdGhpcyBzZXJ2ZXIuPC9wPjwvYm9keT48L2h0bWw+</response>
+  </item>
+  <item>
+    <time>Mon Jan 15 10:00:25 GMT 2024</time>
+    <url>https://api.example.com/api/v1/users/1</url>
+    <host>api.example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>PUT</method>
+    <path>/api/v1/users/1</path>
+    <extension/>
+    <status>500</status>
+    <responselength>128</responselength>
+    <mimetype>JSON</mimetype>
+    <comment/>
+    <request base64="true">UFVUIC9hcGkvdjEvdXNlcnMxIEhUVFAvMS4xDQpIb3N0OiBhcGkuZXhhbXBsZS5jb20NClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjAuMC4wLjAgU2FmYXJpLzUzNy4zNg0KQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9qc29uDQoNCnsibmFtZSI6IlVwZGF0ZWQgTmFtZSJ9</request>
+    <response base64="true">SFRUUC8xLjEgNTAwIEludGVybmFsIFNlcnZlciBFcnJvcg0KRGF0ZTogTW9uLCAxNSBKYW4gMjAyNCAxMDowMDoyNSBHTVQNClNlcnZlcjogQXBhY2hlDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCkNvbnRlbnQtTGVuZ3RoOiA4MA0KDQp7InN1Y2Nlc3MiOmZhbHNlLCJlcnJvciI6IkludGVybmFsIFNlcnZlciBFcnJvciIsIm1lc3NhZ2UiOiJEYXRhYmFzZSBlcnJvciBvY2N1cnJlZCJ9</response>
+  </item>
+</items>
